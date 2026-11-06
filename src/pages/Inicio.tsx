@@ -34,7 +34,7 @@ const funciones = [
 export default function Inicio() {
   return (
     <div className="flex flex-col gap-10 px-4 py-8 md:gap-18 md:px-16 md:py-22">
-      <section className="flex flex-col items-center gap-8 md:flex-row md:gap-16">
+      <section className="flex flex-col items-center gap-8 lg:flex-row lg:gap-16">
         <div className="flex flex-1 flex-col gap-5">
           <span className="w-fit rounded-full bg-superficie px-3 py-1 text-sm text-acento">Para estudiantes que estudian en grupo</span>
           <h1 className="text-3xl font-semibold leading-tight md:text-5xl">Tu salón de estudio, en línea y en tiempo real</h1>
@@ -46,7 +46,7 @@ export default function Inicio() {
             <BotonEnlace to="/ingresar" tipo="secundario">Ya tengo cuenta</BotonEnlace>
           </div>
         </div>
-        <div className="flex w-full flex-col items-center gap-4 rounded-2xl bg-superficie p-6 md:w-[520px]">
+        <div className="flex w-full flex-col items-center gap-4 rounded-2xl bg-superficie p-6 lg:w-[520px]">
           <article className="flex w-full max-w-sm flex-col gap-3 rounded-xl border border-borde bg-fondo p-5 shadow-sm">
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-xl font-medium">Cálculo multivariado</h2>
