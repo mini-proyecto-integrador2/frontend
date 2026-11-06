@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+/* Tokens de la guía visual (Figma: colección "Color" y "Medidas") */
+@theme {
+  --color-primario: #1d4ed8;
+  --color-primario-oscuro: #1e3a8a;
+  --color-acento: #0f766e;
+  --color-texto: #111827;
+  --color-texto-secundario: #4b5563;
+  --color-fondo: #ffffff;
+  --color-superficie: #f3f4f6;
+  --color-borde: #6b7280;
+  --color-error: #b91c1c;
+  --color-error-fondo: #fef2f2;
+  --color-exito: #15803d;
+  --color-exito-fondo: #f0fdf4;
+  --color-advertencia: #b45309;
+
+  --font-titulo: "Poppins", system-ui, sans-serif;
+  --font-cuerpo: "Inter", system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-cuerpo);
+    color: var(--color-texto);
+    background: var(--color-fondo);
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-titulo);
+  }
+}

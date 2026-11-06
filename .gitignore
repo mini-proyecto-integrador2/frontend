@@ -147,3 +147,6 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# El ejemplo de variables SÍ se sube (sin valores reales)
+!.env.example
