@@ -5,7 +5,6 @@ const API_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '')
 
 export type DatoBaseTecnica = {
   mensaje: string
-  documento: string
   actualizado: string
 }
 
@@ -31,7 +30,7 @@ export async function obtenerBaseTecnica(signal?: AbortSignal): Promise<DatoBase
     const respuesta = await fetch(`${API_URL}/api/base`, { signal: controlador.signal })
     const cuerpo = await respuesta.json().catch(() => null)
     if (!respuesta.ok) {
-      throw new ErrorApi(cuerpo?.message ?? 'La API respondió con un error.', respuesta.status)
+      throw new ErrorApi(cuerpo?.error?.message ?? 'La API respondió con un error.', respuesta.status)
     }
     return cuerpo as DatoBaseTecnica
   } catch (e) {
