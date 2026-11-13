@@ -4,6 +4,7 @@ import Inicio from './pages/Inicio'
 import BaseTecnica from './pages/BaseTecnica'
 import NoEncontrada from './pages/NoEncontrada'
 import EnConstruccion from './pages/EnConstruccion'
+import Registro from './pages/Registro'
 
 // Rutas del mapa del sitio (C02). Las que aún no tienen historia muestran "En construcción".
 export default function App() {
@@ -13,8 +14,7 @@ export default function App() {
         {/* Públicas */}
         <Route path="/" element={<Inicio />} />
         <Route path="/ingresar" element={<EnConstruccion titulo="Ingresar" sprint={1} />} />
-        <Route path="/registro" element={<EnConstruccion titulo="Registrarse" sprint={1} />} />
-        <Route path="/ayuda" element={<EnConstruccion titulo="Ayuda" sprint={6} />} />
+        <Route path="/registro" element={<Registro />} />        <Route path="/ayuda" element={<EnConstruccion titulo="Ayuda" sprint={6} />} />
         {/* Privadas (se protegen en el Sprint 1) */}
         <Route path="/completar-perfil" element={<EnConstruccion titulo="Completar perfil" sprint={1} />} />
         <Route path="/panel" element={<EnConstruccion titulo="Panel" sprint={2} />} />
