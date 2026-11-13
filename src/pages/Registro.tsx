@@ -7,6 +7,7 @@ import Carga from '../components/Carga'
 import Mensaje from '../components/Mensaje'
 import SelectorAvatar from '../components/SelectorAvatar'
 import type { AvatarId } from '../components/SelectorAvatar'
+import { useSesion } from '../context/SesionContexto'
 
 type NombreCampo = 'nombres' | 'apellidos' | 'usuario' | 'correo' | 'contrasena'
 type Errores = Partial<Record<NombreCampo, string>>
@@ -44,6 +45,8 @@ function enfocarPrimero(errores: Errores) {
 
 export default function Registro() {
   const navigate = useNavigate()
+
+  const { iniciarSesion } = useSesion()
   const [valores, setValores] = useState<Record<NombreCampo, string>>({
     nombres: '',
     apellidos: '',
@@ -96,6 +99,8 @@ export default function Registro() {
         enfocarPrimero(servidor)
         return
       }
+
+      iniciarSesion({ nombres: valores.nombres.trim(), usuario: valores.usuario, avatar })
       navigate('/panel')
     }, 1200)
   }
