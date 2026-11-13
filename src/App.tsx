@@ -6,6 +6,7 @@ import NoEncontrada from './pages/NoEncontrada'
 import EnConstruccion from './pages/EnConstruccion'
 import Registro from './pages/Registro'
 import RutaPrivada from './components/RutaPrivada'
+import Ingresar from './pages/Ingresar'
 
 // Rutas del mapa del sitio (C02). Las que aún no tienen historia muestran "En construcción".
 export default function App() {
@@ -14,7 +15,7 @@ export default function App() {
       <Route element={<LayoutBase />}>
         {/* Públicas */}
         <Route path="/" element={<Inicio />} />
-        <Route path="/ingresar" element={<EnConstruccion titulo="Ingresar" sprint={1} />} />
+        <Route path="/ingresar" element={<Ingresar />} />
         <Route path="/registro" element={<Registro />} />
         <Route path="/ayuda" element={<EnConstruccion titulo="Ayuda" sprint={6} />} />
 
