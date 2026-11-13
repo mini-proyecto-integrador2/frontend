@@ -28,7 +28,7 @@ export async function obtenerBaseTecnica(signal?: AbortSignal): Promise<DatoBase
   signal?.addEventListener('abort', () => controlador.abort('cancelado'))
 
   try {
-    const respuesta = await fetch(`${API_URL}/api/base-tecnica`, { signal: controlador.signal })
+    const respuesta = await fetch(`${API_URL}/api/base`, { signal: controlador.signal })
     const cuerpo = await respuesta.json().catch(() => null)
     if (!respuesta.ok) {
       throw new ErrorApi(cuerpo?.message ?? 'La API respondió con un error.', respuesta.status)
