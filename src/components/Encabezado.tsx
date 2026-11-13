@@ -1,17 +1,25 @@
 import { useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Logo from './Logo'
-import { BotonEnlace } from './Boton'
+import Boton, { BotonEnlace } from './Boton'
+import { useSesion } from '../context/SesionContexto'
 
-// Encabezado público (mapa del sitio): logo + Ingresar y Registrarse.
+// Encabezado público (mapa del sitio): logo + Ingresar/Registrarse o Cerrar sesión.
 // En celular las acciones se esconden detrás del botón de menú (44 px de área táctil).
 export default function Encabezado() {
   const [abierto, setAbierto] = useState(false)
   const { pathname } = useLocation()
+  const { usuario, cerrarSesion } = useSesion()
+  const navigate = useNavigate()
   const [rutaAnterior, setRutaAnterior] = useState(pathname)
   if (pathname !== rutaAnterior) {
     setRutaAnterior(pathname)
     setAbierto(false)
+  }
+
+  function salir() {
+    cerrarSesion()
+    navigate('/ingresar', { state: { cerradaSesion: true } })
   }
 
   return (
@@ -19,8 +27,19 @@ export default function Encabezado() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-16 md:py-4">
         <Logo />
         <nav aria-label="Principal" className="hidden items-center gap-3 md:flex">
-          <BotonEnlace to="/ingresar" tipo="secundario">Ingresar</BotonEnlace>
-          <BotonEnlace to="/registro">Registrarse</BotonEnlace>
+          {usuario ? (
+            <>
+              <span className="text-sm text-texto-secundario">Hola, {usuario.nombres}</span>
+              <Boton tipo="secundario" onClick={salir}>
+                Cerrar sesión
+              </Boton>
+            </>
+          ) : (
+            <>
+              <BotonEnlace to="/ingresar" tipo="secundario">Ingresar</BotonEnlace>
+              <BotonEnlace to="/registro">Registrarse</BotonEnlace>
+            </>
+          )}
         </nav>
         <button
           type="button"
@@ -48,8 +67,19 @@ export default function Encabezado() {
       </div>
       {abierto && (
         <nav id="menu-movil" aria-label="Principal" className="flex flex-col gap-3 border-t border-superficie px-4 py-4 md:hidden">
-          <BotonEnlace to="/ingresar" tipo="secundario">Ingresar</BotonEnlace>
-          <BotonEnlace to="/registro">Registrarse</BotonEnlace>
+          {usuario ? (
+            <>
+              <span className="text-sm text-texto-secundario">Hola, {usuario.nombres}</span>
+              <Boton tipo="secundario" onClick={salir}>
+                Cerrar sesión
+              </Boton>
+            </>
+          ) : (
+            <>
+              <BotonEnlace to="/ingresar" tipo="secundario">Ingresar</BotonEnlace>
+              <BotonEnlace to="/registro">Registrarse</BotonEnlace>
+            </>
+          )}
         </nav>
       )}
     </header>
