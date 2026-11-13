@@ -105,6 +105,11 @@ export default function Registro() {
     }, 1200)
   }
 
+  function continuarConGoogle() {
+  iniciarSesion({ nombres: 'Camila Rojas', usuario: '', avatar: 'A' })
+  navigate('/completar-perfil')
+  }
+
   return (
     <section className="mx-auto w-full max-w-lg px-4 py-10">
       <div className="rounded-xl border border-borde bg-white p-6 sm:p-8">
@@ -198,8 +203,14 @@ export default function Registro() {
               <span className="h-px flex-1 bg-borde" aria-hidden="true" />
             </div>
 
-            <Boton type="button" tipo="secundario" className="w-full" disabled={cargando}>
-              Continuar con Google
+            <Boton
+            type="button"
+            tipo="secundario"
+            className="w-full"
+            disabled={cargando}
+            onClick={continuarConGoogle}
+            >
+            Continuar con Google
             </Boton>
           </div>
         </form>
