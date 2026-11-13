@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Boton from '../components/Boton'
 import Campo from '../components/Campo'
 import Carga from '../components/Carga'
@@ -14,12 +14,16 @@ const MSG_CREDENCIALES =
 const MSG_GOOGLE =
   'No se pudo continuar con Google. Puedes intentarlo de nuevo o ingresar con tu correo.'
 
-// Datos simulados (Bloque 3). En el Bloque 4 se reemplazan por la API.
+// Datos simulados  
 const CORREO_SIMULADO = 'camila.rojas@correounivalle.edu.co'
 const CONTRASENA_SIMULADA = 'Estudio123'
 
 export default function Ingresar() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const [sesionCerrada, setSesionCerrada] = useState(
+  Boolean((location.state as { cerradaSesion?: boolean } | null)?.cerradaSesion),
+  )
   const { iniciarSesion } = useSesion()
   const [correo, setCorreo] = useState('')
   const [contrasena, setContrasena] = useState('')
@@ -31,6 +35,7 @@ export default function Ingresar() {
   function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault()
     if (cargando) return
+    setSesionCerrada(false) 
 
     const e: Errores = {}
     if (!correo.trim()) e.correo = 'Escribe tu correo.'
@@ -63,6 +68,7 @@ export default function Ingresar() {
 
   function continuarConGoogle() {
     if (cargando) return
+    setSesionCerrada(false) 
     setErrores({})
     setBanner('')
     setTextoCarga('Conectando con Google...')
@@ -82,6 +88,14 @@ export default function Ingresar() {
         </p>
 
         <form onSubmit={enviar} noValidate className="mt-6 flex flex-col gap-5">
+
+            {sesionCerrada && !banner && (
+            <Mensaje tipo="exito">
+                Cerraste sesión correctamente. Tus datos privados ya no se muestran.
+            </Mensaje>
+            )}
+            {banner && <Mensaje tipo="error">{banner}</Mensaje>}
+
           {banner && <Mensaje tipo="error">{banner}</Mensaje>}
 
           <Campo

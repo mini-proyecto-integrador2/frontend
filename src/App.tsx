@@ -8,6 +8,7 @@ import Registro from './pages/Registro'
 import RutaPrivada from './components/RutaPrivada'
 import Ingresar from './pages/Ingresar'
 import CompletarPerfil from './pages/CompletarPerfil'
+import Panel from './pages/Panel'
 
 // Rutas del mapa del sitio (C02). Las que aún no tienen historia muestran "En construcción".
 export default function App() {
@@ -23,7 +24,7 @@ export default function App() {
         {/* Privadas (protegidas por RutaPrivada) */}
         <Route element={<RutaPrivada />}>
           <Route path="/completar-perfil" element={<CompletarPerfil />} />
-          <Route path="/panel" element={<EnConstruccion titulo="Panel" sprint={2} />} />
+          <Route path="/panel" element={<Panel />} />
           <Route path="/perfil" element={<EnConstruccion titulo="Perfil" sprint={2} />} />
           <Route path="/sala/:id" element={<EnConstruccion titulo="Sala" sprint={3} />} />
         </Route>
