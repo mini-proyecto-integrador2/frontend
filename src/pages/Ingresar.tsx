@@ -96,8 +96,6 @@ export default function Ingresar() {
             )}
             {banner && <Mensaje tipo="error">{banner}</Mensaje>}
 
-          {banner && <Mensaje tipo="error">{banner}</Mensaje>}
-
           <Campo
             id="ingresar-correo"
             type="email"
