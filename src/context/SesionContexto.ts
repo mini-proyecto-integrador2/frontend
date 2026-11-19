@@ -1,15 +1,19 @@
 import { createContext, useContext } from 'react'
 import type { AvatarId } from '../components/SelectorAvatar'
+import type { Perfil } from '../services/api'
 
 export type Usuario = {
   nombres: string
-  usuario: string
+  usuario: string // '' = entró con Google pero aún no eligió nombre de usuario
   avatar: AvatarId
+  correo?: string
 }
 
 type Valor = {
   usuario: Usuario | null
-  iniciarSesion: (usuario: Usuario) => void
+  cargando: boolean
+  errorSesion: string
+  establecerPerfil: (perfil: Perfil) => void
   cerrarSesion: () => void
 }
 

@@ -8,49 +8,61 @@ import Mensaje from '../components/Mensaje'
 import SelectorAvatar from '../components/SelectorAvatar'
 import type { AvatarId } from '../components/SelectorAvatar'
 import { useSesion } from '../context/SesionContexto'
+import { ErrorApi, crearPerfilGoogle, obtenerMiPerfil } from '../services/api'
 
 const MSG_BANNER_ERROR = 'No pudimos guardar tu nombre de usuario. Revisa el campo marcado.'
 const MSG_USUARIO_OCUPADO = 'Ese nombre de usuario ya está en uso. Prueba con otro.'
 const MSG_USUARIO_FORMATO = 'Usa entre 3 y 20 caracteres: letras, números o guion bajo.'
-
-// Datos simulados (Bloque 3). En el Bloque 4 se reemplazan por la API.
-const USUARIO_SIMULADO_OCUPADO = 'camila_rojas'
-const CORREO_GOOGLE_SIMULADO = 'camila.rojas@correounivalle.edu.co'
+const MSG_CONEXION =
+  'No pudimos guardar tu nombre de usuario. Revisa tu conexión e inténtalo de nuevo.'
 
 export default function CompletarPerfil() {
   const navigate = useNavigate()
-  const { usuario: sesion, iniciarSesion, cerrarSesion } = useSesion()
+  const { usuario: sesion, establecerPerfil, cerrarSesion } = useSesion()
   const [nombreUsuario, setNombreUsuario] = useState('')
   const [avatar, setAvatar] = useState<AvatarId>('A')
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(false)
 
-  function enviar(evento: FormEvent<HTMLFormElement>) {
+  function marcarError(mensaje: string) {
+    setError(mensaje)
+    document.getElementById('perfil-usuario')?.focus()
+  }
+
+  async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault()
     if (cargando) return
 
     if (!/^[A-Za-z0-9_]{3,20}$/.test(nombreUsuario)) {
-      setError(MSG_USUARIO_FORMATO)
-      document.getElementById('perfil-usuario')?.focus()
+      marcarError(MSG_USUARIO_FORMATO)
       return
     }
 
     setError('')
     setCargando(true)
-    setTimeout(() => {
-      setCargando(false)
-      if (nombreUsuario.toLowerCase() === USUARIO_SIMULADO_OCUPADO) {
-        setError(MSG_USUARIO_OCUPADO)
-        document.getElementById('perfil-usuario')?.focus()
-        return
-      }
-      iniciarSesion({
-        nombres: sesion?.nombres ?? '',
-        usuario: nombreUsuario,
-        avatar,
-      })
+    try {
+      const perfil = await crearPerfilGoogle(nombreUsuario, avatar)
+      establecerPerfil(perfil)
       navigate('/panel')
-    }, 1000)
+    } catch (e) {
+      const codigo = e instanceof ErrorApi ? e.codigo : undefined
+      if (codigo === 'USERNAME_TAKEN') {
+        marcarError(MSG_USUARIO_OCUPADO)
+      } else if (codigo === 'VALIDATION_ERROR') {
+        marcarError(MSG_USUARIO_FORMATO)
+      } else if (codigo === 'PROFILE_EXISTS') {
+        try {
+          establecerPerfil(await obtenerMiPerfil())
+          navigate('/panel')
+        } catch {
+          marcarError(MSG_CONEXION)
+        }
+      } else {
+        marcarError(MSG_CONEXION)
+      }
+    } finally {
+      setCargando(false)
+    }
   }
 
   function cancelar() {
@@ -89,8 +101,8 @@ export default function CompletarPerfil() {
                 <line x1="12" y1="8" x2="12.01" y2="8" />
               </svg>
               <span>
-                Entraste con Google como {CORREO_GOOGLE_SIMULADO}. Necesitas un nombre de usuario
-                para continuar.
+                Entraste con Google como {sesion?.correo ?? 'tu cuenta'}. Necesitas un nombre de
+                usuario para continuar.
               </span>
             </div>
           )}
