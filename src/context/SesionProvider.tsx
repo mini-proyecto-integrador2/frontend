@@ -3,9 +3,12 @@ import type { ReactNode } from 'react'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { auth } from '../services/firebase'
 import { ErrorApi, obtenerMiPerfil } from '../services/api'
+import type { Perfil } from '../services/api'
 import { SesionContexto } from './SesionContexto'
 import type { Usuario } from './SesionContexto'
 import type { AvatarId } from '../components/SelectorAvatar'
+
+
 
 export default function SesionProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null)
@@ -52,11 +55,14 @@ export default function SesionProvider({ children }: { children: ReactNode }) {
     return cancelar
   }, [])
 
-  // Temporal: lo usan las pantallas simuladas hasta que se conecten (4.4 a 4.6).
-  function iniciarSesion(nuevo: Usuario) {
-    setUsuario(nuevo)
+  function establecerPerfil(perfil: Perfil) {
+    setUsuario({
+      nombres: perfil.nombres,
+      usuario: perfil.username,
+      avatar: perfil.avatar as AvatarId,
+      correo: perfil.correo,
+    })
   }
-
   function cerrarSesion() {
     setUsuario(null)
     void signOut(auth)
@@ -64,7 +70,7 @@ export default function SesionProvider({ children }: { children: ReactNode }) {
 
   return (
     <SesionContexto.Provider
-      value={{ usuario, cargando, errorSesion, iniciarSesion, cerrarSesion }}
+      value={{ usuario, cargando, errorSesion, establecerPerfil, cerrarSesion }}
     >
       {children}
     </SesionContexto.Provider>

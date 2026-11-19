@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { AvatarId } from '../components/SelectorAvatar'
+import type { Perfil } from '../services/api'
 
 export type Usuario = {
   nombres: string
@@ -12,7 +13,7 @@ type Valor = {
   usuario: Usuario | null
   cargando: boolean
   errorSesion: string
-  iniciarSesion: (usuario: Usuario) => void // temporal: se quita en la 4.6
+  establecerPerfil: (perfil: Perfil) => void
   cerrarSesion: () => void
 }
 

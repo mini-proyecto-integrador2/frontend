@@ -12,3 +12,6 @@ const app = initializeApp({
 
 export const auth = getAuth(app)
 export const proveedorGoogle = new GoogleAuthProvider()
+proveedorGoogle.setCustomParameters({
+  prompt: 'select_account',
+})

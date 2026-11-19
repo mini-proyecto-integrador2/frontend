@@ -103,10 +103,10 @@ export async function registrarUsuario(datos: DatosRegistro): Promise<Perfil> {
   return r.perfil
 }
 
-export async function crearPerfilGoogle(username: string): Promise<Perfil> {
+export async function crearPerfilGoogle(username: string, avatar?: string): Promise<Perfil> {
   const r = await llamarApi<{ perfil: Perfil }>('/api/usuarios/perfil', {
     metodo: 'POST',
-    cuerpo: { username },
+    cuerpo: avatar ? { username, avatar } : { username },
     conToken: true,
   })
   return r.perfil

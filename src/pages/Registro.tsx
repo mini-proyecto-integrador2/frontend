@@ -8,7 +8,7 @@ import Carga from '../components/Carga'
 import Mensaje from '../components/Mensaje'
 import SelectorAvatar from '../components/SelectorAvatar'
 import type { AvatarId } from '../components/SelectorAvatar'
-import { useSesion } from '../context/SesionContexto'
+import { ingresarConGoogle } from '../services/googleAuth'
 import { auth } from '../services/firebase'
 import { ErrorApi, registrarUsuario } from '../services/api'
 
@@ -18,6 +18,7 @@ type Errores = Partial<Record<NombreCampo, string>>
 const ORDEN: NombreCampo[] = ['nombres', 'apellidos', 'usuario', 'correo', 'contrasena']
 
 const MSG_USUARIO_OCUPADO = 'Ese nombre de usuario ya está en uso. Prueba con otro.'
+const MSG_GOOGLE = 'No se pudo continuar con Google. Puedes intentarlo de nuevo o ingresar con tu correo.'
 const MSG_CORREO_REGISTRADO =
   'Este correo ya tiene una cuenta. Ingresa con ese correo o usa otro para registrarte.'
 const MSG_DATOS_INVALIDOS =
@@ -48,7 +49,6 @@ function enfocarPrimero(errores: Errores) {
 
 export default function Registro() {
   const navigate = useNavigate()
-  const { iniciarSesion } = useSesion() // temporal: solo para «Continuar con Google» hasta la 4.6
   const [valores, setValores] = useState<Record<NombreCampo, string>>({
     nombres: '',
     apellidos: '',
@@ -60,7 +60,7 @@ export default function Registro() {
   const [errores, setErrores] = useState<Errores>({})
   const [bannerServidor, setBannerServidor] = useState('')
   const [cargando, setCargando] = useState(false)
-
+  const [textoCarga, setTextoCarga] = useState('Creando tu cuenta...')
   const hayErrores = Object.keys(errores).length > 0
   const correoYaRegistrado = errores.correo === MSG_CORREO_REGISTRADO
 
@@ -89,6 +89,7 @@ export default function Registro() {
 
     setErrores({})
     setCargando(true)
+    setTextoCarga('Creando tu cuenta...')
 
     const correo = valores.correo.trim()
     try {
@@ -129,10 +130,16 @@ export default function Registro() {
     }
   }
 
-  // Temporal hasta la 4.6 (flujo real de Google).
-  function continuarConGoogle() {
-    iniciarSesion({ nombres: 'Camila Rojas', usuario: '', avatar: 'A' })
-    navigate('/completar-perfil')
+  async function continuarConGoogle() {
+    if (cargando) return
+    setBannerServidor('')
+    setErrores({})
+    setTextoCarga('Conectando con Google...')
+    setCargando(true)
+    const ok = await ingresarConGoogle()
+    setCargando(false)
+    if (ok) navigate('/panel')
+    else setBannerServidor(MSG_GOOGLE)
   }
 
   return (
@@ -222,7 +229,7 @@ export default function Registro() {
             <Boton type="submit" tipo="primario" className="w-full" disabled={cargando}>
               Crear cuenta
             </Boton>
-            {cargando && <Carga texto="Creando tu cuenta..." className="justify-center" />}
+            {cargando && <Carga texto={textoCarga} className="justify-center" />}
 
             <div className="flex items-center gap-3 text-sm text-texto-secundario">
               <span className="h-px flex-1 bg-borde" aria-hidden="true" />

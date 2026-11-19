@@ -7,6 +7,7 @@ import Campo from '../components/Campo'
 import Carga from '../components/Carga'
 import Mensaje from '../components/Mensaje'
 import { useSesion } from '../context/SesionContexto'
+import { ingresarConGoogle } from '../services/googleAuth'
 import { auth } from '../services/firebase'
 
 type Errores = { correo?: string; contrasena?: string }
@@ -82,19 +83,17 @@ export default function Ingresar() {
     }
   }
 
-  // Temporal hasta la 4.6 (flujo real de Google).
-  function continuarConGoogle() {
+  async function continuarConGoogle() {
     if (cargando) return
     setSesionCerrada(false)
-    setIntentado(true)
     setErrores({})
     setBanner('')
     setTextoCarga('Conectando con Google...')
     setCargando(true)
-    setTimeout(() => {
-      setCargando(false)
-      setBanner(MSG_GOOGLE)
-    }, 1000)
+    const ok = await ingresarConGoogle()
+    setCargando(false)
+    if (ok) navigate('/panel')
+    else setBanner(MSG_GOOGLE)
   }
 
   const bannerVisible = banner || (!intentado ? errorSesion : '')
