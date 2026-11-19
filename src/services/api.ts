@@ -6,7 +6,6 @@ const API_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '')
 
 export type DatoBaseTecnica = {
   mensaje: string
-  documento: string
   actualizado: string
 }
 

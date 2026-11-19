@@ -86,10 +86,6 @@ export default function BaseTecnica() {
                   <dd className="font-titulo text-xl font-medium">{estado.dato.mensaje}</dd>
                 </div>
                 <div className="flex flex-col gap-0.5 border-b border-superficie py-3 md:flex-row md:gap-4">
-                  <dt className="text-sm text-texto-secundario md:w-36">Documento</dt>
-                  <dd>{estado.dato.documento}</dd>
-                </div>
-                <div className="flex flex-col gap-0.5 border-b border-superficie py-3 md:flex-row md:gap-4">
                   <dt className="text-sm text-texto-secundario md:w-36">Actualizado</dt>
                   <dd>{formatearFecha(estado.dato.actualizado)}</dd>
                 </div>
