@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { signInWithEmailAndPassword } from 'firebase/auth'
 import Boton from '../components/Boton'
 import Campo from '../components/Campo'
 import Carga from '../components/Carga'
 import Mensaje from '../components/Mensaje'
 import { useSesion } from '../context/SesionContexto'
+import { auth } from '../services/firebase'
 
 type Errores = { correo?: string; contrasena?: string }
 
@@ -13,29 +15,44 @@ const MSG_CREDENCIALES =
   'Correo o contraseña incorrectos. Revisa tus datos e inténtalo de nuevo.'
 const MSG_GOOGLE =
   'No se pudo continuar con Google. Puedes intentarlo de nuevo o ingresar con tu correo.'
+const MSG_MUCHOS_INTENTOS = 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.'
+const MSG_CONEXION =
+  'No pudimos iniciar tu sesión. Revisa tu conexión e inténtalo de nuevo.'
 
-// Datos simulados  
-const CORREO_SIMULADO = 'camila.rojas@correounivalle.edu.co'
-const CONTRASENA_SIMULADA = 'Estudio123'
+const CODIGOS_CREDENCIALES = [
+  'auth/invalid-credential',
+  'auth/wrong-password',
+  'auth/user-not-found',
+  'auth/invalid-email',
+]
+
+function mensajeDeFirebase(error: unknown): string {
+  const codigo = (error as { code?: string } | null)?.code ?? ''
+  if (CODIGOS_CREDENCIALES.includes(codigo)) return MSG_CREDENCIALES
+  if (codigo === 'auth/too-many-requests') return MSG_MUCHOS_INTENTOS
+  return MSG_CONEXION
+}
 
 export default function Ingresar() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [sesionCerrada, setSesionCerrada] = useState(
-  Boolean((location.state as { cerradaSesion?: boolean } | null)?.cerradaSesion),
-  )
-  const { iniciarSesion } = useSesion()
+  const { errorSesion } = useSesion()
   const [correo, setCorreo] = useState('')
   const [contrasena, setContrasena] = useState('')
   const [errores, setErrores] = useState<Errores>({})
   const [banner, setBanner] = useState('')
   const [cargando, setCargando] = useState(false)
   const [textoCarga, setTextoCarga] = useState('Iniciando sesión...')
+  const [sesionCerrada, setSesionCerrada] = useState(
+    Boolean((location.state as { cerradaSesion?: boolean } | null)?.cerradaSesion),
+  )
+  const [intentado, setIntentado] = useState(false)
 
-  function enviar(evento: FormEvent<HTMLFormElement>) {
+  async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault()
     if (cargando) return
-    setSesionCerrada(false) 
+    setSesionCerrada(false)
+    setIntentado(true)
 
     const e: Errores = {}
     if (!correo.trim()) e.correo = 'Escribe tu correo.'
@@ -54,21 +71,22 @@ export default function Ingresar() {
     setErrores({})
     setTextoCarga('Iniciando sesión...')
     setCargando(true)
-    setTimeout(() => {
-      setCargando(false)
-      if (correo.trim().toLowerCase() === CORREO_SIMULADO && contrasena === CONTRASENA_SIMULADA) {
-        iniciarSesion({ nombres: 'Camila', usuario: 'camila_rojas', avatar: 'A' })
-        navigate('/panel')
-        return
-      }
-      setBanner(MSG_CREDENCIALES)
+    try {
+      await signInWithEmailAndPassword(auth, correo.trim(), contrasena)
+      navigate('/panel')
+    } catch (error) {
+      setBanner(mensajeDeFirebase(error))
       document.getElementById('ingresar-correo')?.focus()
-    }, 1000)
+    } finally {
+      setCargando(false)
+    }
   }
 
+  // Temporal hasta la 4.6 (flujo real de Google).
   function continuarConGoogle() {
     if (cargando) return
-    setSesionCerrada(false) 
+    setSesionCerrada(false)
+    setIntentado(true)
     setErrores({})
     setBanner('')
     setTextoCarga('Conectando con Google...')
@@ -79,6 +97,8 @@ export default function Ingresar() {
     }, 1000)
   }
 
+  const bannerVisible = banner || (!intentado ? errorSesion : '')
+
   return (
     <section className="mx-auto w-full max-w-lg px-4 py-10">
       <div className="rounded-xl border border-borde bg-white p-6 sm:p-8">
@@ -88,13 +108,12 @@ export default function Ingresar() {
         </p>
 
         <form onSubmit={enviar} noValidate className="mt-6 flex flex-col gap-5">
-
-            {sesionCerrada && !banner && (
+          {sesionCerrada && !bannerVisible && (
             <Mensaje tipo="exito">
-                Cerraste sesión correctamente. Tus datos privados ya no se muestran.
+              Cerraste sesión correctamente. Tus datos privados ya no se muestran.
             </Mensaje>
-            )}
-            {banner && <Mensaje tipo="error">{banner}</Mensaje>}
+          )}
+          {bannerVisible && <Mensaje tipo="error">{bannerVisible}</Mensaje>}
 
           <Campo
             id="ingresar-correo"
