@@ -3,13 +3,16 @@ import type { AvatarId } from '../components/SelectorAvatar'
 
 export type Usuario = {
   nombres: string
-  usuario: string
+  usuario: string // '' = entró con Google pero aún no eligió nombre de usuario
   avatar: AvatarId
+  correo?: string
 }
 
 type Valor = {
   usuario: Usuario | null
-  iniciarSesion: (usuario: Usuario) => void
+  cargando: boolean
+  errorSesion: string
+  iniciarSesion: (usuario: Usuario) => void // temporal: se quita en la 4.6
   cerrarSesion: () => void
 }
 
