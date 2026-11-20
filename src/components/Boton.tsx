@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from 'react'
+import type { ComponentProps } from 'react'
 import { Link } from 'react-router-dom'
 
 type Tipo = 'primario' | 'secundario' | 'peligro'
@@ -20,7 +20,7 @@ export function clasesBoton(tipo: Tipo = 'primario', extra = '') {
   return `${base} ${tipos[tipo]} ${extra}`
 }
 
-type Props = ButtonHTMLAttributes<HTMLButtonElement> & { tipo?: Tipo }
+type Props = ComponentProps<'button'> & { tipo?: Tipo }
 
 export default function Boton({ tipo = 'primario', className = '', ...props }: Props) {
   return <button className={clasesBoton(tipo, className)} {...props} />

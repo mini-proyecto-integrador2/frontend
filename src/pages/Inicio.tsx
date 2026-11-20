@@ -1,4 +1,6 @@
+import { useLocation } from 'react-router-dom'
 import { BotonEnlace } from '../components/Boton'
+import Mensaje from '../components/Mensaje'
 
 const funciones = [
   {
@@ -32,8 +34,10 @@ const funciones = [
 ]
 
 export default function Inicio() {
+  const { state } = useLocation()
   return (
     <div className="flex flex-col gap-10 px-4 py-8 md:gap-18 md:px-16 md:py-22">
+      {state?.cuentaEliminada && <Mensaje tipo="exito">Tu cuenta fue eliminada. Gracias por haber estado en el Salón de Estudio.</Mensaje>}
       <section className="flex flex-col items-center gap-8 lg:flex-row lg:gap-16">
         <div className="flex flex-1 flex-col gap-5">
           <span className="w-fit rounded-full bg-superficie px-3 py-1 text-sm text-acento">Para estudiantes que estudian en grupo</span>

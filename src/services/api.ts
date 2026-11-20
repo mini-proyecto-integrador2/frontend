@@ -122,3 +122,21 @@ export async function usernameDisponible(username: string): Promise<boolean> {
   )
   return r.disponible
 }
+
+// --- Perfil (US-04) y cuenta (US-05) ---
+
+export type CambiosPerfil = Partial<Pick<Perfil, 'nombres' | 'apellidos' | 'username' | 'avatar'>>
+
+export async function actualizarMiPerfil(cambios: CambiosPerfil): Promise<Perfil> {
+  const r = await llamarApi<{ perfil: Perfil }>('/api/usuarios/yo', {
+    metodo: 'PATCH',
+    cuerpo: cambios,
+    conToken: true,
+  })
+  return r.perfil
+}
+
+// DELETE /api/usuarios/yo responde 204 (sin cuerpo): borra la cuenta, el perfil y el nombre de usuario.
+export async function eliminarMiCuenta(): Promise<void> {
+  await llamarApi<null>('/api/usuarios/yo', { metodo: 'DELETE', conToken: true })
+}
