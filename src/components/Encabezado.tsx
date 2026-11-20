@@ -30,6 +30,9 @@ export default function Encabezado() {
           {usuario ? (
             <>
               <span className="text-sm text-texto-secundario">Hola, {usuario.nombres}</span>
+              <Link to="/panel" className="rounded font-semibold text-primario underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primario-oscuro focus-visible:ring-offset-2">
+                Mis salas
+              </Link>
               <Link to="/perfil" className="rounded font-semibold text-primario underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primario-oscuro focus-visible:ring-offset-2">
                 Mi perfil
               </Link>
@@ -73,6 +76,9 @@ export default function Encabezado() {
           {usuario ? (
             <>
               <span className="text-sm text-texto-secundario">Hola, {usuario.nombres}</span>
+              <Link to="/panel" className="rounded font-semibold text-primario underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primario-oscuro focus-visible:ring-offset-2">
+                Mis salas
+              </Link>
               <Link to="/perfil" className="rounded font-semibold text-primario underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primario-oscuro focus-visible:ring-offset-2">
                 Mi perfil
               </Link>

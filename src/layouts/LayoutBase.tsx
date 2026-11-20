@@ -13,6 +13,7 @@ const TITULOS: { ruta: string; titulo: string }[] = [
   { ruta: '/completar-perfil', titulo: 'Completar perfil' },
   { ruta: '/panel', titulo: 'Panel' },
   { ruta: '/perfil', titulo: 'Perfil' },
+  { ruta: '/salas/nueva', titulo: 'Crear sala' },
   { ruta: '/sala/:id', titulo: 'Sala' },
   { ruta: '/base-tecnica', titulo: 'Base técnica' },
 ]

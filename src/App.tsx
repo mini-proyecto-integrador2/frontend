@@ -10,6 +10,8 @@ import Ingresar from './pages/Ingresar'
 import CompletarPerfil from './pages/CompletarPerfil'
 import Panel from './pages/Panel'
 import Perfil from './pages/Perfil'
+import CrearSala from './pages/CrearSala'
+import Sala from './pages/Sala'
 
 // Rutas del mapa del sitio (C02). Las que aún no tienen historia muestran "En construcción".
 export default function App() {
@@ -27,7 +29,8 @@ export default function App() {
           <Route path="/completar-perfil" element={<CompletarPerfil />} />
           <Route path="/panel" element={<Panel />} />
           <Route path="/perfil" element={<Perfil />} />
-          <Route path="/sala/:id" element={<EnConstruccion titulo="Sala" sprint={3} />} />
+          <Route path="/salas/nueva" element={<CrearSala />} />
+          <Route path="/sala/:id" element={<Sala />} />
         </Route>
 
         {/* Apoyo */}
