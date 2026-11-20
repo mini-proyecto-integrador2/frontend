@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Logo from './Logo'
 import Boton, { BotonEnlace } from './Boton'
 import { useSesion } from '../context/SesionContexto'
@@ -30,6 +30,9 @@ export default function Encabezado() {
           {usuario ? (
             <>
               <span className="text-sm text-texto-secundario">Hola, {usuario.nombres}</span>
+              <Link to="/perfil" className="rounded font-semibold text-primario underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primario-oscuro focus-visible:ring-offset-2">
+                Mi perfil
+              </Link>
               <Boton tipo="secundario" onClick={salir}>
                 Cerrar sesión
               </Boton>
@@ -70,6 +73,9 @@ export default function Encabezado() {
           {usuario ? (
             <>
               <span className="text-sm text-texto-secundario">Hola, {usuario.nombres}</span>
+              <Link to="/perfil" className="rounded font-semibold text-primario underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primario-oscuro focus-visible:ring-offset-2">
+                Mi perfil
+              </Link>
               <Boton tipo="secundario" onClick={salir}>
                 Cerrar sesión
               </Boton>
