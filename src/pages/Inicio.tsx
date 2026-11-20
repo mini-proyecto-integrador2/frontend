@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { BotonEnlace } from '../components/Boton'
 import Mensaje from '../components/Mensaje'
+import { useSesion } from '../context/SesionContexto'
 
 const funciones = [
   {
@@ -35,6 +36,8 @@ const funciones = [
 
 export default function Inicio() {
   const { state } = useLocation()
+  const { usuario } = useSesion()
+  const conSesion = !!usuario && usuario.usuario !== ''
   return (
     <div className="flex flex-col gap-10 px-4 py-8 md:gap-18 md:px-16 md:py-22">
       {state?.cuentaEliminada && <Mensaje tipo="exito">Tu cuenta fue eliminada. Gracias por haber estado en el Salón de Estudio.</Mensaje>}
@@ -46,8 +49,17 @@ export default function Inicio() {
             Crea una sala, comparte el ID con tu grupo y estudien juntos con chat, audio, video y pantalla compartida. Sin instalar nada.
           </p>
           <div className="flex flex-col gap-3 md:flex-row">
-            <BotonEnlace to="/registro">Crear cuenta gratis</BotonEnlace>
-            <BotonEnlace to="/ingresar" tipo="secundario">Ya tengo cuenta</BotonEnlace>
+            {conSesion ? (
+              <>
+                <BotonEnlace to="/panel">Ir a mis salas</BotonEnlace>
+                <BotonEnlace to="/perfil" tipo="secundario">Mi perfil</BotonEnlace>
+              </>
+            ) : (
+              <>
+                <BotonEnlace to="/registro">Crear cuenta gratis</BotonEnlace>
+                <BotonEnlace to="/ingresar" tipo="secundario">Ya tengo cuenta</BotonEnlace>
+              </>
+            )}
           </div>
         </div>
         <div className="flex w-full flex-col items-center gap-4 rounded-2xl bg-superficie p-6 lg:w-[520px]">
