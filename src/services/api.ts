@@ -140,3 +140,33 @@ export async function actualizarMiPerfil(cambios: CambiosPerfil): Promise<Perfil
 export async function eliminarMiCuenta(): Promise<void> {
   await llamarApi<null>('/api/usuarios/yo', { metodo: 'DELETE', conToken: true })
 }
+
+
+// --- Salas (US-06) ---
+// Contrato SUPUESTO hasta que Martín publique /api/salas en Swagger; ajustar rutas y campos si cambia.
+
+export type Sala = {
+  id: string
+  nombre: string
+  anfitrion: { uid: string; username: string }
+  creada: string
+}
+
+export async function crearSala(nombre: string): Promise<Sala> {
+  const r = await llamarApi<{ sala: Sala }>('/api/salas', {
+    metodo: 'POST',
+    cuerpo: { nombre },
+    conToken: true,
+  })
+  return r.sala
+}
+
+export async function listarMisSalas(): Promise<Sala[]> {
+  const r = await llamarApi<{ salas: Sala[] }>('/api/salas', { conToken: true })
+  return r.salas
+}
+
+export async function obtenerSala(id: string): Promise<Sala> {
+  const r = await llamarApi<{ sala: Sala }>(`/api/salas/${encodeURIComponent(id)}`, { conToken: true })
+  return r.sala
+}
