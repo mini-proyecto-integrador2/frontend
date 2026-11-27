@@ -5,11 +5,13 @@ import BotonCopiarId from '../components/BotonCopiarId'
 import Carga from '../components/Carga'
 import Mensaje from '../components/Mensaje'
 import Chat from '../components/sala/Chat'
+import Dialogo from '../components/sala/Dialogo'
+import EditarSala from '../components/sala/EditarSala'
 import EstadoConexion from '../components/sala/EstadoConexion'
 import Participantes from '../components/sala/Participantes'
 import { useHistorial } from '../hooks/useHistorial'
 import { useSalaTiempoReal } from '../hooks/useSalaTiempoReal'
-import { ErrorApi, unirseASala } from '../services/api'
+import { eliminarSala, ErrorApi, unirseASala } from '../services/api'
 import type { Sala as TipoSala } from '../services/api'
 import { auth } from '../services/firebase'
 
@@ -23,6 +25,11 @@ export default function Sala() {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
   const [aviso, setAviso] = useState('')
+  const [editando, setEditando] = useState(false)
+  const [confirmarEliminar, setConfirmarEliminar] = useState(false)
+  const [eliminando, setEliminando] = useState(false)
+  const [errorEliminar, setErrorEliminar] = useState('')
+  const [salaEliminada, setSalaEliminada] = useState(false)
   const miUid = auth.currentUser?.uid
 
   const cargar = useCallback(async () => {
@@ -46,8 +53,34 @@ export default function Sala() {
     void cargar()
   }, [cargar])
 
-  const tiempoReal = useSalaTiempoReal(sala?.id ?? null)
+  // US-07: el anfitrión cambió el nombre o eliminó la sala (aviso desde el tiempo real).
+  const tiempoReal = useSalaTiempoReal(sala?.id ?? null, {
+    onSalaActualizada: (nueva) => {
+      setSala((actual) => (actual ? { ...actual, nombre: nueva.nombre } : actual))
+      setAviso(`El anfitrión cambió el nombre de la sala a «${nueva.nombre}».`)
+    },
+    onSalaEliminada: () => setSalaEliminada(true),
+  })
   const historial = useHistorial(sala?.id ?? null, tiempoReal.agregarMensajes)
+
+  async function eliminar() {
+    if (!sala) return
+    setEliminando(true)
+    setErrorEliminar('')
+    try {
+      await eliminarSala(sala.id)
+      await tiempoReal.avisar('sala:eliminada')
+      await tiempoReal.salir()
+      navigate('/panel', { state: { salaEliminada: sala.nombre } })
+    } catch (e) {
+      setErrorEliminar(
+        e instanceof ErrorApi && e.status === 403
+          ? 'Solo el anfitrión de la sala puede eliminarla.'
+          : 'No pudimos eliminar la sala. Revisa tu conexión e inténtalo de nuevo.',
+      )
+      setEliminando(false)
+    }
+  }
 
   async function salir() {
     await tiempoReal.salir()
@@ -75,6 +108,23 @@ export default function Sala() {
   }
 
   const esAnfitrion = sala.esCreador !== false
+
+  if (editando) {
+    return (
+      <section className="w-full px-4 py-10">
+        <EditarSala
+          sala={sala}
+          onCancelar={() => setEditando(false)}
+          onGuardada={(nueva) => {
+            setSala((actual) => (actual ? { ...actual, nombre: nueva.nombre } : actual))
+            setEditando(false)
+            setAviso('Cambios guardados. Todos ven el nuevo nombre.')
+            void tiempoReal.avisar('sala:actualizada')
+          }}
+        />
+      </section>
+    )
+  }
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6 sm:py-10">
@@ -104,6 +154,22 @@ export default function Sala() {
         </div>
         <div className="flex flex-wrap gap-2">
           <BotonCopiarId id={sala.id} onCopiado={() => setAviso('ID copiado al portapapeles.')} />
+          {esAnfitrion && (
+            <>
+              <Boton type="button" tipo="secundario" onClick={() => setEditando(true)}>Editar sala</Boton>
+              <Boton
+                type="button"
+                tipo="secundario"
+                className="border-error! text-error! hover:bg-error-fondo!"
+                onClick={() => {
+                  setErrorEliminar('')
+                  setConfirmarEliminar(true)
+                }}
+              >
+                Eliminar sala
+              </Boton>
+            </>
+          )}
           <Boton type="button" tipo="secundario" onClick={() => void salir()}>
             Salir de la sala
           </Boton>
@@ -145,6 +211,35 @@ export default function Sala() {
           <Participantes participantes={tiempoReal.participantes} anfitrionUid={sala.anfitrion.uid} miUid={miUid} />
         </div>
       </div>
+
+      {confirmarEliminar && (
+        <Dialogo
+          titulo={`¿Eliminar la sala «${sala.nombre}»?`}
+          onCerrar={eliminando ? undefined : () => setConfirmarEliminar(false)}
+          acciones={
+            <>
+              <Boton type="button" tipo="secundario" disabled={eliminando} onClick={() => setConfirmarEliminar(false)}>
+                Cancelar
+              </Boton>
+              <Boton type="button" tipo="peligro" disabled={eliminando} onClick={() => void eliminar()}>
+                {eliminando ? 'Eliminando…' : 'Eliminar sala'}
+              </Boton>
+            </>
+          }
+        >
+          <p>Se borrarán la sala y todos sus mensajes, y los participantes conectados saldrán de ella. Esta acción no se puede deshacer.</p>
+          {errorEliminar && <div className="mt-3"><Mensaje tipo="error">{errorEliminar}</Mensaje></div>}
+        </Dialogo>
+      )}
+
+      {salaEliminada && (
+        <Dialogo
+          titulo="La sala fue eliminada"
+          acciones={<BotonEnlace to="/panel">Volver al panel</BotonEnlace>}
+        >
+          <p>El anfitrión eliminó esta sala. Ya no puedes enviar mensajes aquí.</p>
+        </Dialogo>
+      )}
     </section>
   )
 }
