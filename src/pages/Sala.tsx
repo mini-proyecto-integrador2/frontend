@@ -1,20 +1,28 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useLocation, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Boton, { BotonEnlace } from '../components/Boton'
 import BotonCopiarId from '../components/BotonCopiarId'
 import Carga from '../components/Carga'
 import Mensaje from '../components/Mensaje'
+import Chat from '../components/sala/Chat'
+import EstadoConexion from '../components/sala/EstadoConexion'
+import Participantes from '../components/sala/Participantes'
+import { useSalaTiempoReal } from '../hooks/useSalaTiempoReal'
 import { ErrorApi, unirseASala } from '../services/api'
 import type { Sala as TipoSala } from '../services/api'
+import { auth } from '../services/firebase'
 
-// Interior de la sala. Al abrirla (desde el panel o con un enlace directo) se registra la membresía (US-08).
+// Interior de la sala: zonas de chat, participantes y acciones.
+// Al abrirla (desde el panel o con un enlace directo) se registra la membresía (US-08) y se conecta al tiempo real (US-10).
 export default function Sala() {
   const { id = '' } = useParams()
   const { state } = useLocation()
+  const navigate = useNavigate()
   const [sala, setSala] = useState<TipoSala | null>(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
   const [aviso, setAviso] = useState('')
+  const miUid = auth.currentUser?.uid
 
   const cargar = useCallback(async () => {
     setCargando(true)
@@ -37,53 +45,79 @@ export default function Sala() {
     void cargar()
   }, [cargar])
 
+  const tiempoReal = useSalaTiempoReal(sala?.id ?? null)
+
+  async function salir() {
+    await tiempoReal.salir()
+    navigate('/panel')
+  }
+
+  if (cargando) {
+    return (
+      <section className="mx-auto w-full max-w-6xl px-4 py-10">
+        <Carga texto="Abriendo la sala..." className="justify-center" />
+      </section>
+    )
+  }
+
+  if (error || !sala) {
+    return (
+      <section className="mx-auto w-full max-w-2xl px-4 py-10">
+        <div className="flex flex-col gap-4 rounded-xl border border-borde bg-white p-6 sm:p-8">
+          <Mensaje tipo="error">{error || 'No pudimos abrir la sala.'}</Mensaje>
+          <Boton type="button" onClick={() => void cargar()}>Reintentar</Boton>
+          <BotonEnlace to="/panel" tipo="secundario">Volver al panel</BotonEnlace>
+        </div>
+      </section>
+    )
+  }
+
+  const esAnfitrion = sala.esCreador !== false
+
   return (
-    <section className="mx-auto w-full max-w-2xl px-4 py-10">
-      <div className="flex flex-col gap-6 rounded-xl border border-borde bg-white p-6 sm:p-8">
-        {cargando && <Carga texto="Abriendo la sala..." className="justify-center" />}
+    <section className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6 sm:py-10">
+      {state?.recienCreada && (
+        <Mensaje tipo="exito">Sala creada. Comparte el ID con tus compañeros para que se unan.</Mensaje>
+      )}
+      {state?.recienUnido && (
+        <Mensaje tipo="exito">Te uniste a la sala. Ya puedes chatear con el grupo.</Mensaje>
+      )}
+      {tiempoReal.estado === 'reconectando' && (
+        <div role="status" className="rounded-lg border border-advertencia bg-[#FFFBEB] px-4 py-3 text-texto">
+          Se perdió la conexión. Estamos reconectándote a la sala…
+        </div>
+      )}
+      {tiempoReal.estado === 'error' && <Mensaje tipo="error">{tiempoReal.errorConexion}</Mensaje>}
 
-        {!cargando && error && (
-          <>
-            <Mensaje tipo="error">{error}</Mensaje>
-            <Boton type="button" onClick={() => void cargar()}>Reintentar</Boton>
-            <BotonEnlace to="/panel" tipo="secundario">Volver al panel</BotonEnlace>
-          </>
-        )}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-bold text-texto sm:text-3xl">{sala.nombre}</h1>
+            <EstadoConexion estado={tiempoReal.estado} />
+          </div>
+          <p className="mt-1 text-sm text-texto-secundario">
+            ID: {sala.id} ·{' '}
+            {esAnfitrion ? 'Eres el anfitrión' : `Te uniste como invitado · Anfitrión: ${sala.anfitrion.username}`}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <BotonCopiarId id={sala.id} onCopiado={() => setAviso('ID copiado al portapapeles.')} />
+          <Boton type="button" tipo="secundario" onClick={() => void salir()}>
+            Salir de la sala
+          </Boton>
+        </div>
+      </div>
+      <div role="status" aria-live="polite">
+        {aviso && <Mensaje tipo="exito">{aviso}</Mensaje>}
+      </div>
 
-        {!cargando && !error && sala && (
-          <>
-            {state?.recienCreada && (
-              <Mensaje tipo="exito">Sala creada. Comparte el ID con tus compañeros para que se unan.</Mensaje>
-            )}
-            {state?.recienUnido && (
-              <Mensaje tipo="exito">Te uniste a la sala. Ya puedes estudiar con el grupo.</Mensaje>
-            )}
-            <div>
-              <h1 className="text-2xl font-bold text-texto sm:text-3xl">{sala.nombre}</h1>
-              <p className="mt-2 text-sm text-texto-secundario">
-                {sala.esCreador === false
-                  ? `Te uniste como invitado. Anfitrión: ${sala.anfitrion.username}.`
-                  : 'Eres el anfitrión de esta sala.'}
-              </p>
-            </div>
-            <div className="flex flex-col gap-4 rounded-xl border border-borde bg-superficie p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm text-texto-secundario">ID de la sala</p>
-                <p className="font-titulo text-2xl font-semibold text-texto">{sala.id}</p>
-              </div>
-              <BotonCopiarId
-                id={sala.id}
-                tipo="primario"
-                className="w-full sm:w-auto"
-                onCopiado={() => setAviso('ID copiado al portapapeles.')}
-              />
-            </div>
-            <div role="status" aria-live="polite">
-              {aviso && <Mensaje tipo="exito">{aviso}</Mensaje>}
-            </div>
-            <BotonEnlace to="/panel" tipo="secundario">Volver al panel</BotonEnlace>
-          </>
-        )}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="order-2 lg:order-1">
+          <Chat mensajes={tiempoReal.mensajes} miUid={miUid} estado={tiempoReal.estado} onEnviar={tiempoReal.enviar} />
+        </div>
+        <div className="order-1 lg:order-2">
+          <Participantes participantes={tiempoReal.participantes} anfitrionUid={sala.anfitrion.uid} miUid={miUid} />
+        </div>
       </div>
     </section>
   )
