@@ -200,3 +200,18 @@ export async function obtenerHistorial(
   if (antes) params.set('antes', antes)
   return llamarApi(`/api/salas/${encodeURIComponent(salaId)}/mensajes?${params}`, { conToken: true })
 }
+
+// US-07: solo el anfitrión puede editar o eliminar (la API responde 403 FORBIDDEN a los demás).
+export async function editarSala(id: string, nombre: string): Promise<Sala> {
+  const r = await llamarApi<{ sala: Sala }>(`/api/salas/${encodeURIComponent(id)}`, {
+    metodo: 'PATCH',
+    cuerpo: { nombre },
+    conToken: true,
+  })
+  return r.sala
+}
+
+// DELETE /api/salas/:id responde 204 (sin cuerpo).
+export async function eliminarSala(id: string): Promise<void> {
+  await llamarApi<null>(`/api/salas/${encodeURIComponent(id)}`, { metodo: 'DELETE', conToken: true })
+}
