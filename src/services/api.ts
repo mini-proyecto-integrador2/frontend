@@ -180,3 +180,38 @@ export async function unirseASala(id: string): Promise<Sala> {
   })
   return r.sala
 }
+
+// US-11: historial de la sala, del más viejo al más nuevo. Máximo 100 por página; `antes` pide mensajes anteriores.
+export type MensajeHistorial = {
+  id: string
+  salaId: string
+  autor: { uid: string; username: string }
+  texto: string
+  enviado: string
+}
+
+export const LIMITE_HISTORIAL = 50
+
+export async function obtenerHistorial(
+  salaId: string,
+  antes?: string,
+): Promise<{ mensajes: MensajeHistorial[]; hayMas: boolean }> {
+  const params = new URLSearchParams({ limite: String(LIMITE_HISTORIAL) })
+  if (antes) params.set('antes', antes)
+  return llamarApi(`/api/salas/${encodeURIComponent(salaId)}/mensajes?${params}`, { conToken: true })
+}
+
+// US-07: solo el anfitrión puede editar o eliminar (la API responde 403 FORBIDDEN a los demás).
+export async function editarSala(id: string, nombre: string): Promise<Sala> {
+  const r = await llamarApi<{ sala: Sala }>(`/api/salas/${encodeURIComponent(id)}`, {
+    metodo: 'PATCH',
+    cuerpo: { nombre },
+    conToken: true,
+  })
+  return r.sala
+}
+
+// DELETE /api/salas/:id responde 204 (sin cuerpo).
+export async function eliminarSala(id: string): Promise<void> {
+  await llamarApi<null>(`/api/salas/${encodeURIComponent(id)}`, { metodo: 'DELETE', conToken: true })
+}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import Boton, { BotonEnlace } from '../components/Boton'
 import BotonCopiarId from '../components/BotonCopiarId'
 import Carga from '../components/Carga'
@@ -11,6 +11,7 @@ import type { Sala } from '../services/api'
 
 export default function Panel() {
   const { usuario } = useSesion()
+  const { state } = useLocation()
   const primerNombre = usuario?.nombres.trim().split(' ')[0] ?? ''
 
   const [salas, setSalas] = useState<Sala[] | null>(null)
@@ -51,6 +52,10 @@ export default function Panel() {
             + Crear sala
           </BotonEnlace>
         </div>
+
+        {state?.salaEliminada && (
+          <Mensaje tipo="exito">Sala «{state.salaEliminada}» eliminada. Se avisó a los participantes conectados.</Mensaje>
+        )}
 
         <UnirseSala />
 
