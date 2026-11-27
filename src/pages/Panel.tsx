@@ -4,6 +4,7 @@ import Boton, { BotonEnlace } from '../components/Boton'
 import BotonCopiarId from '../components/BotonCopiarId'
 import Carga from '../components/Carga'
 import Mensaje from '../components/Mensaje'
+import UnirseSala from '../components/UnirseSala'
 import { useSesion } from '../context/SesionContexto'
 import { listarMisSalas } from '../services/api'
 import type { Sala } from '../services/api'
@@ -51,6 +52,8 @@ export default function Panel() {
           </BotonEnlace>
         </div>
 
+        <UnirseSala />
+
         {cargando && <Carga texto="Cargando tus salones..." className="justify-center" />}
 
         {!cargando && error && (
@@ -66,7 +69,7 @@ export default function Panel() {
           <div className="rounded-xl border border-borde bg-superficie px-6 py-10 text-center">
             <p className="font-bold text-texto">Aún no tienes salones de estudio.</p>
             <p className="mt-1 text-sm text-texto-secundario">
-              Crea una sala y compártele el ID a tus compañeros para empezar a estudiar juntos.
+              Crea una sala y compártele el ID a tus compañeros, o únete a una con el ID que te compartan.
             </p>
           </div>
         )}
@@ -88,7 +91,7 @@ export default function Panel() {
                       {s.nombre}
                     </Link>
                     <p className="text-sm text-texto-secundario">
-                      ID: {s.id} · Anfitrión
+                      ID: {s.id} · {s.esCreador === false ? 'Invitado' : 'Anfitrión'}
                     </p>
                   </div>
                   <BotonCopiarId
