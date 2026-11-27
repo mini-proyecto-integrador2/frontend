@@ -142,14 +142,15 @@ export async function eliminarMiCuenta(): Promise<void> {
 }
 
 
-// --- Salas (US-06) ---
-// Contrato SUPUESTO hasta que Martín publique /api/salas en Swagger; ajustar rutas y campos si cambia.
+// --- Salas (US-06, US-07, US-08) ---
+// Contrato publicado en Swagger (backend-api). esCreador indica si quien consulta es el anfitrión.
 
 export type Sala = {
   id: string
   nombre: string
   anfitrion: { uid: string; username: string }
   creada: string
+  esCreador?: boolean
 }
 
 export async function crearSala(nombre: string): Promise<Sala> {
@@ -168,5 +169,14 @@ export async function listarMisSalas(): Promise<Sala[]> {
 
 export async function obtenerSala(id: string): Promise<Sala> {
   const r = await llamarApi<{ sala: Sala }>(`/api/salas/${encodeURIComponent(id)}`, { conToken: true })
+  return r.sala
+}
+
+// US-08: unirse a una sala con su ID. Es idempotente: si ya estás dentro (o eres el anfitrión) responde igual.
+export async function unirseASala(id: string): Promise<Sala> {
+  const r = await llamarApi<{ sala: Sala }>(`/api/salas/${encodeURIComponent(id.trim().toUpperCase())}/unirse`, {
+    metodo: 'POST',
+    conToken: true,
+  })
   return r.sala
 }

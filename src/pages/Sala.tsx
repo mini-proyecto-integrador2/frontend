@@ -4,10 +4,10 @@ import Boton, { BotonEnlace } from '../components/Boton'
 import BotonCopiarId from '../components/BotonCopiarId'
 import Carga from '../components/Carga'
 import Mensaje from '../components/Mensaje'
-import { ErrorApi, obtenerSala } from '../services/api'
+import { ErrorApi, unirseASala } from '../services/api'
 import type { Sala as TipoSala } from '../services/api'
 
-// Pantalla de entrada a la sala. El chat y el audio/video llegan en el Sprint 3.
+// Interior de la sala. Al abrirla (desde el panel o con un enlace directo) se registra la membresía (US-08).
 export default function Sala() {
   const { id = '' } = useParams()
   const { state } = useLocation()
@@ -20,7 +20,7 @@ export default function Sala() {
     setCargando(true)
     setError('')
     try {
-      setSala(await obtenerSala(id))
+      setSala(await unirseASala(id))
     } catch (e) {
       setError(
         e instanceof ErrorApi && e.status === 404
@@ -55,9 +55,16 @@ export default function Sala() {
             {state?.recienCreada && (
               <Mensaje tipo="exito">Sala creada. Comparte el ID con tus compañeros para que se unan.</Mensaje>
             )}
+            {state?.recienUnido && (
+              <Mensaje tipo="exito">Te uniste a la sala. Ya puedes estudiar con el grupo.</Mensaje>
+            )}
             <div>
               <h1 className="text-2xl font-bold text-texto sm:text-3xl">{sala.nombre}</h1>
-              <p className="mt-2 text-sm text-texto-secundario">Eres el anfitrión de esta sala.</p>
+              <p className="mt-2 text-sm text-texto-secundario">
+                {sala.esCreador === false
+                  ? `Te uniste como invitado. Anfitrión: ${sala.anfitrion.username}.`
+                  : 'Eres el anfitrión de esta sala.'}
+              </p>
             </div>
             <div className="flex flex-col gap-4 rounded-xl border border-borde bg-superficie p-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
