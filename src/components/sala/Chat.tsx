@@ -27,11 +27,12 @@ export default function Chat({ mensajes, miUid, estado, onEnviar, encabezadoList
   const idError = `${idEntrada}-error`
   const conectado = estado === 'conectado'
 
-  // Bajar al último mensaje cuando llega uno nuevo.
+  // Bajar al último mensaje cuando llega uno nuevo (no al cargar mensajes anteriores arriba).
+  const ultimoId = mensajes[mensajes.length - 1]?.id
   useEffect(() => {
     const lista = listaRef.current
     if (lista) lista.scrollTop = lista.scrollHeight
-  }, [mensajes.length])
+  }, [ultimoId, cargando])
 
   async function enviar(e: FormEvent) {
     e.preventDefault()
