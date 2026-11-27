@@ -7,6 +7,7 @@ import Mensaje from '../components/Mensaje'
 import Chat from '../components/sala/Chat'
 import EstadoConexion from '../components/sala/EstadoConexion'
 import Participantes from '../components/sala/Participantes'
+import { useHistorial } from '../hooks/useHistorial'
 import { useSalaTiempoReal } from '../hooks/useSalaTiempoReal'
 import { ErrorApi, unirseASala } from '../services/api'
 import type { Sala as TipoSala } from '../services/api'
@@ -46,6 +47,7 @@ export default function Sala() {
   }, [cargar])
 
   const tiempoReal = useSalaTiempoReal(sala?.id ?? null)
+  const historial = useHistorial(sala?.id ?? null, tiempoReal.agregarMensajes)
 
   async function salir() {
     await tiempoReal.salir()
@@ -113,7 +115,31 @@ export default function Sala() {
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <div className="order-2 lg:order-1">
-          <Chat mensajes={tiempoReal.mensajes} miUid={miUid} estado={tiempoReal.estado} onEnviar={tiempoReal.enviar} />
+          <Chat
+            mensajes={tiempoReal.mensajes}
+            miUid={miUid}
+            estado={tiempoReal.estado}
+            onEnviar={tiempoReal.enviar}
+            cargando={historial.cargando}
+            encabezadoLista={
+              <>
+                {historial.cargando && <Carga texto="Cargando mensajes anteriores…" className="m-auto" />}
+                {!historial.cargando && historial.error && (
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <p role="alert" className="text-sm text-error">⚠ {historial.error}</p>
+                    <Boton type="button" tipo="secundario" onClick={() => void historial.cargar()}>Reintentar</Boton>
+                  </div>
+                )}
+                {!historial.cargando && historial.hayMas && (
+                  <div className="flex justify-center">
+                    <Boton type="button" tipo="secundario" disabled={historial.cargandoAnteriores} onClick={() => void historial.cargarAnteriores()}>
+                      {historial.cargandoAnteriores ? 'Cargando…' : 'Ver mensajes anteriores'}
+                    </Boton>
+                  </div>
+                )}
+              </>
+            }
+          />
         </div>
         <div className="order-1 lg:order-2">
           <Participantes participantes={tiempoReal.participantes} anfitrionUid={sala.anfitrion.uid} miUid={miUid} />

@@ -180,3 +180,23 @@ export async function unirseASala(id: string): Promise<Sala> {
   })
   return r.sala
 }
+
+// US-11: historial de la sala, del más viejo al más nuevo. Máximo 100 por página; `antes` pide mensajes anteriores.
+export type MensajeHistorial = {
+  id: string
+  salaId: string
+  autor: { uid: string; username: string }
+  texto: string
+  enviado: string
+}
+
+export const LIMITE_HISTORIAL = 50
+
+export async function obtenerHistorial(
+  salaId: string,
+  antes?: string,
+): Promise<{ mensajes: MensajeHistorial[]; hayMas: boolean }> {
+  const params = new URLSearchParams({ limite: String(LIMITE_HISTORIAL) })
+  if (antes) params.set('antes', antes)
+  return llamarApi(`/api/salas/${encodeURIComponent(salaId)}/mensajes?${params}`, { conToken: true })
+}
